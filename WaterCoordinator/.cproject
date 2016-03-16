@@ -31,11 +31,11 @@
 								<option id="de.innot.avreclipse.compiler.option.debug.level.1669162121" name="Generate Debugging Info" superClass="de.innot.avreclipse.compiler.option.debug.level" value="de.innot.avreclipse.compiler.option.debug.level.none" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.2033281663" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize" value="de.innot.avreclipse.compiler.optimize.size" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.compiler.option.incpath.592386128" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/WaterCoordinator/Tasks}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Atmega328FreeRTOS/FreeRTOS}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Atmega328pLIBS/Atmega328pLIBS/lcd}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Atmega328pLIBS/Atmega328pLIBS/uart}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Atmega328pLIBS/Atmega328pLIBS/rs485}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/WaterCoordinator/Tasks}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Atmega328pLIBS/Atmega328pLIBS/lcd}&quot;"/>
 								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.2106456378" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
