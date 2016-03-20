@@ -50,8 +50,8 @@ static void prvSensorsTask(void *arg) {
 				break;
 
 			case WAIT_RESPONSE_FROM_SENSORS:
-				// Espera uma resposta por 2 segundos. Depois disso TIMEOUT.
-				if (xQueueReceive(getRs485ResponseQueue(), sensorsResponse, 2000) == pdPASS) {
+				// Espera uma resposta por 1 segundos. Depois disso TIMEOUT.
+				if (xQueueReceive(getRs485ResponseQueue(), sensorsResponse, 1000) == pdPASS) {
 					prvShowSensorsOnLine();
 					processState = SHOW_SENSORS_STATE;
 				} else {
