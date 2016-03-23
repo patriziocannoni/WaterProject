@@ -18,7 +18,9 @@ int main(void) {
 
 	// Inicializa o hardware.
 	inicializarLCD();
+	_delay_ms(100);
 	initRS485();
+	_delay_ms(100);
 
 	// Inicializa a tarefa do protocolo RS485.
 	xStartRS485MasterTask();
@@ -28,6 +30,8 @@ int main(void) {
 
 	// Inicializa a tarefa de leitura dos sensores.
 	xStartSensorsTask(lcdQueueHandle);
+
+	_delay_ms(100);
 
 	// Inicia o scheduler.
 	vTaskStartScheduler();

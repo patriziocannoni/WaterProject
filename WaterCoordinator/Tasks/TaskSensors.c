@@ -44,14 +44,15 @@ static void prvSensorsTask(void *arg) {
 	for (;;) {
 		switch (processState) {
 			case REQUEST_SENSORS_STATE:
-				vTaskDelay(1000);
-				xQueueSend(getRs485CommandQueue(), readSensorsCommand, 0);
-				processState = WAIT_RESPONSE_FROM_SENSORS;
+				vTaskDelay(500);
+				if (xQueueSend(getRs485CommandQueue(), readSensorsCommand, 0) == pdPASS) {
+					processState = WAIT_RESPONSE_FROM_SENSORS;
+				}
 				break;
 
 			case WAIT_RESPONSE_FROM_SENSORS:
-				// Espera uma resposta por 1 segundos. Depois disso TIMEOUT.
-				if (xQueueReceive(getRs485ResponseQueue(), sensorsResponse, 1000) == pdPASS) {
+				// Espera uma resposta por 500 ms. Depois disso TIMEOUT.
+				if (xQueueReceive(getRs485ResponseQueue(), sensorsResponse, 500) == pdPASS) {
 					prvShowSensorsOnLine();
 					processState = SHOW_SENSORS_STATE;
 				} else {

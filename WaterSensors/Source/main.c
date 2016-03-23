@@ -5,6 +5,7 @@
  *      Author: Patrizio
  */
 
+#include <util/delay.h>
 #include <task.h>
 #include <rs485.h>
 #include <TaskPumpSecurity.h>
@@ -13,6 +14,7 @@
 
 int main(void) {
 	initRS485();
+	_delay_ms(100);
 
 	// Inicializa a tarefa do protocolo RS485.
 	xStartRS485SlaveTask();
@@ -22,6 +24,8 @@ int main(void) {
 
 	// Inicializa a tarefa dos sensores.
 	xStartSensorsTask();
+
+	_delay_ms(100);
 
 	// Inicia o scheduler.
 	vTaskStartScheduler();

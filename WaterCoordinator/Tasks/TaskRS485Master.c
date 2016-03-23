@@ -97,7 +97,6 @@ static void prvRS485MasterTask(void *arg) {
 
 			case WAITING_RESPONSE:
 				vTaskDelay(RS485_TRANSITION_DELAY_MS);
-
 				rxChar = readRS485();
 
 				if (rxChar != '\0' && isValidMessageHeader(rxChar)) {
