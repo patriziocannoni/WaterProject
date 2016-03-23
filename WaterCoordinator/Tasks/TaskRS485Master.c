@@ -125,7 +125,6 @@ static void prvRS485MasterTask(void *arg) {
 			case PUBLISHING_SENSORS_RESPONSE:
 				msg = rxMessage;
 				xQueueSend(responseQueue, msg, portMAX_DELAY);
-				vTaskDelay(100); // Espera um pouco para enviar mais um comando.
 				processState = WAITING_COMMAND_TO_SEND;
 				break;
 		}

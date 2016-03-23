@@ -100,7 +100,6 @@ static void prvRS485SlaveTask(void *arg) {
 
 			case PARSING_RESPONSE:
 				while (xQueueReceive(responseQueue, response, portMAX_DELAY) != pdPASS);
-				vTaskDelay(100); // Espera um pouco para responder.
 				processState = SET_TX_STATE;
 				break;
 
