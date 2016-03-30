@@ -83,7 +83,7 @@ static void prvRS485SlaveTask(void *arg) {
 
 				if (rxChar != '\0') {
 					rxMessage[rxIndex] = rxChar;
-					if (isValidMessageEnd(rxChar)) {
+					if (isValidMessageEnd(rxMessage[rxIndex])) {
 						flushRs485RxBuffer();
 						processState = PUBLISHING_MESSAGE;
 					} else {
