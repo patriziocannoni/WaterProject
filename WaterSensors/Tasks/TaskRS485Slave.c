@@ -18,12 +18,10 @@ static xQueueHandle commandQueue;
 static xQueueHandle responseQueue;
 
 enum {
-	SET_RX_STATE,
-	SET_TX_STATE,
 	WAITING_RX_MESSAGE,
+	PARSING_RESPONSE,
 	PARSING_MESSAGE,
 	PUBLISHING_MESSAGE,
-	PARSING_RESPONSE,
 	SENDING_MESSAGE
 };
 
@@ -32,7 +30,7 @@ static unsigned char isValidMessageHeader(unsigned char c);
 static unsigned char isValidMessageEnd(unsigned char c);
 
 void xStartRS485SlaveTask(void) {
-	processState = SET_RX_STATE;
+	processState = WAITING_RX_MESSAGE;
 
 	commandQueue = xQueueCreate(1, 3);
 	responseQueue = xQueueCreate(1, 3);
@@ -59,12 +57,8 @@ static void prvRS485SlaveTask(void *arg) {
 
 	for (;;) {
 		switch (processState) {
-			case SET_RX_STATE:
-				rs485SetRead();
-				processState = WAITING_RX_MESSAGE;
-				break;
-
 			case WAITING_RX_MESSAGE:
+				rs485SetRead();
 				vTaskDelay(RS485_TRANSITION_DELAY_MS);
 				rxChar = readRS485();
 
@@ -94,29 +88,22 @@ static void prvRS485SlaveTask(void *arg) {
 
 			case PUBLISHING_MESSAGE:
 				msg = rxMessage;
-				xQueueSend(commandQueue, msg, portMAX_DELAY);
+				while (xQueueSend(commandQueue, msg, portMAX_DELAY) != pdPASS);
 				processState = PARSING_RESPONSE;
 				break;
 
 			case PARSING_RESPONSE:
 				while (xQueueReceive(responseQueue, response, portMAX_DELAY) != pdPASS);
-				processState = SET_TX_STATE;
-				break;
-
-			case SET_TX_STATE:
-				rs485SetWrite();
-				vTaskDelay(RS485_TRANSITION_DELAY_MS);
 				processState = SENDING_MESSAGE;
 				break;
 
 			case SENDING_MESSAGE:
+				rs485SetWrite();
+				vTaskDelay(RS485_TRANSITION_DELAY_MS);
 				writeRS485(response);
-
-				while (!rs485TransmitComplete()) {
-					vTaskDelay(RS485_CHECK_TRANSMIT_OK_DELAY);
-				}
-
-				processState = SET_RX_STATE;
+				while (!rs485TransmitComplete());
+				vTaskDelay(RS485_CHECK_TRANSMIT_OK_DELAY);
+				processState = WAITING_RX_MESSAGE;
 				break;
 		}
 	}

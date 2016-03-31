@@ -19,6 +19,8 @@ static void prvShowSensorsOnLine(void);
 
 // Estado do processo.
 static unsigned char processState;
+// Constante de TIMEOUT
+static uint16_t TIMEOUT = 500;
 // Comando para ler sensores do WaterSensors.
 static char* readSensorsCommand = "|S\n";
 static char* lcdSensorsOffLineMsg = "SNS OFF";
@@ -44,15 +46,14 @@ static void prvSensorsTask(void *arg) {
 	for (;;) {
 		switch (processState) {
 			case REQUEST_SENSORS_STATE:
-				vTaskDelay(500);
-				if (xQueueSend(getRs485CommandQueue(), readSensorsCommand, 0) == pdPASS) {
-					processState = WAIT_RESPONSE_FROM_SENSORS;
-				}
+				vTaskDelay(TIMEOUT);
+				while (xQueueSend(getRs485CommandQueue(), readSensorsCommand, TIMEOUT) != pdPASS);
+				processState = WAIT_RESPONSE_FROM_SENSORS;
 				break;
 
 			case WAIT_RESPONSE_FROM_SENSORS:
 				// Espera uma resposta por 500 ms. Depois disso TIMEOUT.
-				if (xQueueReceive(getRs485ResponseQueue(), sensorsResponse, 500) == pdPASS) {
+				if (xQueueReceive(getRs485ResponseQueue(), sensorsResponse, TIMEOUT) == pdPASS) {
 					prvShowSensorsOnLine();
 					processState = SHOW_SENSORS_STATE;
 				} else {

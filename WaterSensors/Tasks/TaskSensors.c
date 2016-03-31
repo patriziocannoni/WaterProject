@@ -84,7 +84,7 @@ static void prvSensorsTask(void *arg) {
 				response[0] = '|';
 				response[1] = (sensorsState01 << 4) & 0xFF; // FIXME Melhorar este masking
 				response[2] = '\n';
-				xQueueSend(getRs485ResponseQueue(), response, portMAX_DELAY);
+				while (xQueueSend(getRs485ResponseQueue(), response, portMAX_DELAY) != pdPASS);
 				processState = WAITING_SENSORS_COMMAND;
 				break;
 		}
