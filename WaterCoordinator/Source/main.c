@@ -5,8 +5,6 @@
  *      Author: Patrizio
  */
 
-#include <task.h>
-#include <queue.h>
 #include <lcd.h>
 #include <rs485.h>
 #include <TaskLCD.h>
@@ -14,8 +12,6 @@
 #include <TaskSensors.h>
 
 int main(void) {
-	xQueueHandle lcdQueueHandle;
-
 	// Inicializa o hardware.
 	inicializarLCD();
 	_delay_ms(100);
@@ -26,10 +22,10 @@ int main(void) {
 	xStartRS485MasterTask();
 
 	// Inicializa a tarefa do LCD.
-	lcdQueueHandle = xStartLCDTask();
+	xStartLCDTask();
 
 	// Inicializa a tarefa de leitura dos sensores.
-	xStartSensorsTask(lcdQueueHandle);
+	xStartSensorsTask();
 
 	_delay_ms(100);
 

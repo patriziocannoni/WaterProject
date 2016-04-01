@@ -7,10 +7,12 @@
 
 #include <FreeRTOS.h>
 #include <task.h>
+#include <queue.h>
 #include <rs485.h>
 #include <lcd.h>
 #include "TaskRS485Master.h"
 #include "TaskSensors.h"
+#include "TaskLCD.h"
 
 static void prvSensorsTask(void *arg);
 static void prvShowSensorsState(unsigned char sensorsState);
@@ -27,7 +29,6 @@ static char* lcdSensorsOffLineMsg = "SNS OFF";
 static char* lcdSensorsOnLineMsg = "SNS OK ";
 static char* lcdSensorsError = "----";
 static unsigned char sensorsResponse[3];
-static xQueueHandle xLcdQueueHandler;
 
 enum {
 	REQUEST_SENSORS_STATE,
@@ -36,8 +37,7 @@ enum {
 	SHOW_SENSORS_OFF_LINE
 };
 
-void xStartSensorsTask(xQueueHandle lcdQueueHandle) {
-	xLcdQueueHandler = lcdQueueHandle;
+void xStartSensorsTask() {
 	processState = REQUEST_SENSORS_STATE;
 	xTaskCreate(prvSensorsTask, (signed portCHAR *) "SNRS", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 }
@@ -88,7 +88,7 @@ static void prvShowSensorsState(unsigned char sensorsState) {
 	message.line = LCD_LINHA_1;
 	message.column = 0;
 	message.pcMessage = (uint8_t *) lcdMsg;
-	xQueueSend(xLcdQueueHandler, &message, portMAX_DELAY);
+	xQueueSend(getLCDQueue(), &message, portMAX_DELAY);
 }
 
 static void prvShowSensorsOffLine(void) {
@@ -97,11 +97,11 @@ static void prvShowSensorsOffLine(void) {
 	message.line = LCD_LINHA_1;
 	message.column = 0;
 	message.pcMessage = (uint8_t *) lcdSensorsError;
-	xQueueSend(xLcdQueueHandler, &message, portMAX_DELAY);
+	xQueueSend(getLCDQueue(), &message, portMAX_DELAY);
 
 	message.line = LCD_LINHA_2;
 	message.pcMessage = (uint8_t *) lcdSensorsOffLineMsg;
-	xQueueSend(xLcdQueueHandler, &message, portMAX_DELAY);
+	xQueueSend(getLCDQueue(), &message, portMAX_DELAY);
 }
 
 static void prvShowSensorsOnLine(void) {
@@ -110,5 +110,5 @@ static void prvShowSensorsOnLine(void) {
 	message.line = LCD_LINHA_2;
 	message.column = 0;
 	message.pcMessage = (uint8_t *) lcdSensorsOnLineMsg;
-	xQueueSend(xLcdQueueHandler, &message, portMAX_DELAY);
+	xQueueSend(getLCDQueue(), &message, portMAX_DELAY);
 }

@@ -8,9 +8,10 @@
 #ifndef TASKLCD_H_
 #define TASKLCD_H_
 
-#include <task.h>
 #include <queue.h>
+#include <task.h>
 
-xQueueHandle xStartLCDTask(void);
+xQueueHandle getLCDQueue(void);
+void xStartLCDTask(void);
 
 #endif /* TASKLCD_H_ */

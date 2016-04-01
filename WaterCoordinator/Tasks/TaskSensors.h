@@ -8,8 +8,6 @@
 #ifndef TASKSENSORS_H_
 #define TASKSENSORS_H_
 
-#include <queue.h>
-
-void xStartSensorsTask(xQueueHandle lcdQueueHandle);
+void xStartSensorsTask();
 
 #endif /* TASKSENSORS_H_ */
