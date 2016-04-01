@@ -5,6 +5,7 @@
  *      Author: Patrizio
  */
 
+#include <FreeRTOS.h>
 #include <lcd.h>
 #include <rs485.h>
 #include <TaskLCD.h>

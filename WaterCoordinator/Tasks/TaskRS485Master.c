@@ -44,7 +44,7 @@ void xStartRS485MasterTask(void) {
 
 	processState = WAITING_COMMAND_TO_SEND;
 
-	if (commandQueue != NULL) {
+	if (commandQueue != NULL && responseQueue != NULL) {
 		xTaskCreate(prvRS485MasterTask, (signed portCHAR *) "R485", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
 	}
 }
