@@ -28,17 +28,17 @@
 		<link>
 			<name>FreeRTOS</name>
 			<type>2</type>
-			<location>/home/patrizio/Desenvolvimento/git/atmega328p/Atmega328FreeRTOS/FreeRTOS</location>
+			<location>/home/patrizio/git/atmega328p/Atmega328FreeRTOS/FreeRTOS</location>
 		</link>
 		<link>
 			<name>rs485</name>
 			<type>2</type>
-			<location>/home/patrizio/Desenvolvimento/git/atmega328p/Atmega328pLIBS/Atmega328pLIBS/rs485</location>
+			<location>/home/patrizio/git/atmega328p/Atmega328pLIBS/Atmega328pLIBS/rs485</location>
 		</link>
 		<link>
 			<name>uart</name>
 			<type>2</type>
-			<location>/home/patrizio/Desenvolvimento/git/atmega328p/Atmega328pLIBS/Atmega328pLIBS/uart</location>
+			<location>/home/patrizio/git/atmega328p/Atmega328pLIBS/Atmega328pLIBS/uart</location>
 		</link>
 	</linkedResources>
 </projectDescription>
