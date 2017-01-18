@@ -8,6 +8,6 @@
 #ifndef TASKSENSORS_H_
 #define TASKSENSORS_H_
 
-void xStartSensorsTask();
+void xStartSensorsTask(void);
 
 #endif /* TASKSENSORS_H_ */
