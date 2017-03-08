@@ -14,37 +14,28 @@
 // Estado do processo.
 static unsigned char processState;
 
-static xQueueHandle commandQueue;
 static xQueueHandle responseQueue;
 
 enum {
-	WAITING_COMMAND_TO_SEND,
-	SENDING_COMMAND,
 	WAITING_RESPONSE,
 	PARSING_RX_MESSAGE,
 	PUBLISHING_SENSORS_RESPONSE
 };
 
-static unsigned char isValidCommand(unsigned char* commandPtr);
 static unsigned char isValidMessageHeader(unsigned char c);
 static unsigned char isValidMessageEnd(unsigned char c);
 static void prvRS485MasterTask(void *arg);
-
-xQueueHandle getRs485CommandQueue(void) {
-	return commandQueue;
-}
 
 xQueueHandle getRs485ResponseQueue(void) {
 	return responseQueue;
 }
 
 void xStartRS485MasterTask(void) {
-	commandQueue = xQueueCreate(1, 3);
 	responseQueue = xQueueCreate(1, 3);
 
-	processState = WAITING_COMMAND_TO_SEND;
+	processState = WAITING_RESPONSE;
 
-	if (commandQueue != NULL && responseQueue != NULL) {
+	if (responseQueue != NULL) {
 		xTaskCreate(prvRS485MasterTask, (signed portCHAR *) "R485", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
 	}
 }
@@ -52,11 +43,10 @@ void xStartRS485MasterTask(void) {
 void flushTaskRs485Master(void) {
 	flushRs485RxBuffer();
 	flushRs485TxBuffer();
-	processState = WAITING_COMMAND_TO_SEND;
+	processState = WAITING_RESPONSE;
 }
 
 static void prvRS485MasterTask(void *arg) {
-	unsigned char command[3];
 	unsigned char rxMessage[3];
 	unsigned char* msg;
 	unsigned char rxChar;
@@ -64,25 +54,6 @@ static void prvRS485MasterTask(void *arg) {
 
 	for (;;) {
 		switch (processState) {
-			case WAITING_COMMAND_TO_SEND:
-				while (xQueueReceive(commandQueue, command, portMAX_DELAY) != pdPASS);
-				if (isValidCommand(command)) {
-					processState = SENDING_COMMAND;
-				} else {
-					flushRs485RxBuffer();
-				}
-				break;
-
-			case SENDING_COMMAND:
-				rs485SetWrite();
-				vTaskDelay(RS485_TRANSITION_DELAY_MS);
-				writeRS485(command);
-				while (!rs485TransmitComplete()) {
-					vTaskDelay(RS485_CHECK_TRANSMIT_OK_DELAY);
-				}
-				processState = WAITING_RESPONSE;
-				break;
-
 			case WAITING_RESPONSE:
 				rs485SetRead();
 				vTaskDelay(RS485_TRANSITION_DELAY_MS);
@@ -113,15 +84,10 @@ static void prvRS485MasterTask(void *arg) {
 			case PUBLISHING_SENSORS_RESPONSE:
 				msg = rxMessage;
 				while (xQueueSend(responseQueue, msg, portMAX_DELAY) != pdPASS);
-				processState = WAITING_COMMAND_TO_SEND;
+				processState = WAITING_RESPONSE;
 				break;
 		}
 	}
-}
-
-static unsigned char isValidCommand(unsigned char* commandPtr) {
-	// TODO Verificar a integridade da mensagem.
-	return 1;
 }
 
 static unsigned char isValidMessageHeader(unsigned char c) {

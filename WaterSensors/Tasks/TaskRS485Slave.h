@@ -11,7 +11,6 @@
 #include <queue.h>
 
 void xStartRS485SlaveTask(void);
-xQueueHandle getRs485CommandQueue(void);
 xQueueHandle getRs485ResponseQueue(void);
 
 #endif /* TASKRS485SLAVE_H_ */

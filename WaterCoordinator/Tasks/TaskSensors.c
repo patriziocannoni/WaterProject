@@ -21,38 +21,32 @@ static void prvShowSensorsOnLine(void);
 
 // Estado do processo.
 static unsigned char processState;
+
 // Constante de TIMEOUT
+// Se o Coordinator não recebe nada dos sensores dentro do timeout, mostra sensores off-line no display
 static uint16_t TIMEOUT = 500;
-// Comando para ler sensores do WaterSensors.
-static char* readSensorsCommand = "|S\n";
+
 static char* lcdSensorsOffLineMsg = "SNS OFF";
 static char* lcdSensorsOnLineMsg = "SNS OK ";
 static char* lcdSensorsError = "----";
 static unsigned char sensorsResponse[3];
 
 enum {
-	REQUEST_SENSORS_STATE,
-	WAIT_RESPONSE_FROM_SENSORS,
+	WAIT_SENSORS_STATE,
 	SHOW_SENSORS_STATE,
 	SHOW_SENSORS_OFF_LINE
 };
 
 void xStartSensorsTask() {
-	processState = REQUEST_SENSORS_STATE;
+	processState = WAIT_SENSORS_STATE;
 	xTaskCreate(prvSensorsTask, (signed portCHAR *) "SNRS", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 }
 
 static void prvSensorsTask(void *arg) {
 	for (;;) {
 		switch (processState) {
-			case REQUEST_SENSORS_STATE:
-				vTaskDelay(TIMEOUT);
-				while (xQueueSend(getRs485CommandQueue(), readSensorsCommand, TIMEOUT) != pdPASS);
-				processState = WAIT_RESPONSE_FROM_SENSORS;
-				break;
-
-			case WAIT_RESPONSE_FROM_SENSORS:
-				// Espera uma resposta por 500 ms. Depois disso TIMEOUT.
+			case WAIT_SENSORS_STATE:
+				// Espera uma resposta por 5 segundos. Depois disso TIMEOUT.
 				if (xQueueReceive(getRs485ResponseQueue(), sensorsResponse, TIMEOUT) == pdPASS) {
 					prvShowSensorsOnLine();
 					processState = SHOW_SENSORS_STATE;
@@ -64,12 +58,12 @@ static void prvSensorsTask(void *arg) {
 
 			case SHOW_SENSORS_STATE:
 				prvShowSensorsState(sensorsResponse[1]);
-				processState = REQUEST_SENSORS_STATE;
+				processState = WAIT_SENSORS_STATE;
 				break;
 
 			case SHOW_SENSORS_OFF_LINE:
 				prvShowSensorsOffLine();
-				processState = REQUEST_SENSORS_STATE;
+				processState = WAIT_SENSORS_STATE;
 				break;
 		}
 	}

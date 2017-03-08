@@ -27,10 +27,9 @@ static unsigned char sensorsState01;
 static unsigned char sensorsState02;
 
 enum {
-	WAITING_SENSORS_COMMAND,
 	READ_SENSORS_STEP1,
 	READ_SENSORS_STEP2,
-	SEND_RESPONSE
+	SEND_SENSORS_STATE
 };
 
 void xStartSensorsTask(void) {
@@ -46,46 +45,39 @@ void xStartSensorsTask(void) {
 	DDRC &= ~_BV(DDC3);
 	PORTC |= _BV(PORTC3);
 
-	processState = WAITING_SENSORS_COMMAND;
+	processState = READ_SENSORS_STEP1;
 	xTaskCreate(prvSensorsTask, (signed portCHAR *) "SNRS", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 }
 
 static void prvSensorsTask(void *arg) {
-	unsigned char message[3];
 	unsigned char response[3];
 
 	for (;;) {
 		switch (processState) {
-			case WAITING_SENSORS_COMMAND:
-				while (xQueueReceive(getRs485CommandQueue(), message, portMAX_DELAY) != pdPASS);
-				if (strcmp((const char*) message, (const char*) "|S\n")) {
-					processState = READ_SENSORS_STEP1;
-				}
-				break;
-
 			case READ_SENSORS_STEP1:
-				vTaskDelay(10);
+				vTaskDelay(100);
 				sensorsState01 = sensorsState();
 				processState = READ_SENSORS_STEP2;
 				break;
 
 			case READ_SENSORS_STEP2:
-				vTaskDelay(10);
+				vTaskDelay(100);
 				sensorsState02 = sensorsState();
 
 				if (sensorsState02 == sensorsState01) {
-					processState = SEND_RESPONSE;
+					processState = SEND_SENSORS_STATE;
 				} else {
 					processState = READ_SENSORS_STEP1;
 				}
 				break;
 
-			case SEND_RESPONSE:
+			case SEND_SENSORS_STATE:
 				response[0] = '|';
 				response[1] = (sensorsState01 << 4) & 0xFF; // FIXME Melhorar este masking
 				response[2] = '\n';
 				while (xQueueSend(getRs485ResponseQueue(), response, portMAX_DELAY) != pdPASS);
-				processState = WAITING_SENSORS_COMMAND;
+				vTaskDelay(100);
+				processState = READ_SENSORS_STEP1;
 				break;
 		}
 	}
