@@ -10,7 +10,7 @@
 #include "TaskButton.h"
 #include <TaskPump.h>
 
-#define BUTTON_C0_PRESSED() !(PINC & _BV(PORTC0))
+#define BUTTON_C0_PRESSED() !(PIND & _BV(PORTD2))
 
 static void prvButtonTask(void *arg);
 
@@ -24,10 +24,10 @@ enum {
 
 void xStartButtonTask(void) {
 	// Pin C0 as INPUT
-	DDRC &= ~_BV(DDC0);
+	DDRD &= ~_BV(DDD2);
 
 	// Pull-up ON
-	PORTC |= _BV(PORTC0);
+	PORTD |= _BV(PORTD2);
 
 	processState = BUTTON_READ;
 	xTaskCreate(prvButtonTask, (signed portCHAR *) "BUTN", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
