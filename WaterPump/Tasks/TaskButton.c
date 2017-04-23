@@ -10,7 +10,7 @@
 #include "TaskButton.h"
 #include <TaskPump.h>
 
-#define BUTTON_C0_PRESSED() !(PIND & _BV(PORTD2))
+#define BUTTON_D2_PRESSED() !(PIND & _BV(PORTD2))
 
 static void prvButtonTask(void *arg);
 
@@ -37,7 +37,7 @@ static void prvButtonTask(void *arg) {
 	for (;;) {
 		switch (processState) {
 		case BUTTON_READ:
-			if (BUTTON_C0_PRESSED()) {	// Input LOW --> Button pressed
+			if (BUTTON_D2_PRESSED()) {	// Input LOW --> Button pressed
 				processState = BUTTON_DEBOUNCE;
 			} else {
 				vTaskDelay(1); // 1ms de atraso, faz o polling do botão com frequência de 1KHz
@@ -46,10 +46,10 @@ static void prvButtonTask(void *arg) {
 
 		case BUTTON_DEBOUNCE:
 			vTaskDelay(18);
-			if (BUTTON_C0_PRESSED() && buttonState == 0) {
+			if (BUTTON_D2_PRESSED() && buttonState == 0) {
 				togglePump();
 				buttonState = 1;
-			} else if (!BUTTON_C0_PRESSED()) {
+			} else if (!BUTTON_D2_PRESSED()) {
 				buttonState = 0;
 			}
 			processState = BUTTON_READ;
