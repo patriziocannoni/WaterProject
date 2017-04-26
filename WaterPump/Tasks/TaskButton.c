@@ -5,55 +5,48 @@
  *      Author: Patrizio
  */
 
+#include <avr/interrupt.h>
 #include <FreeRTOS.h>
 #include <task.h>
-#include "TaskButton.h"
+#include <semphr.h>
 #include <TaskPump.h>
+#include "TaskButton.h"
 
 #define BUTTON_D2_PRESSED() !(PIND & _BV(PORTD2))
 
 static void prvButtonTask(void *arg);
 
-static unsigned char processState;
-static unsigned char buttonState = 0;
-
-enum {
-	BUTTON_READ,
-	BUTTON_DEBOUNCE
-};
+static xSemaphoreHandle xSemaphore;
 
 void xStartButtonTask(void) {
-	// Pin C0 as INPUT
-	DDRD &= ~_BV(DDD2);
+	DDRD &= ~(_BV(DDD2));     	// Clear the PD2 pin
+	// PD2 (PCINT0 pin) is now an input
 
-	// Pull-up ON
-	PORTD |= _BV(PORTD2);
+	PORTD |= _BV(PORTD2);  	// turn On the Pull-up
+	// PD2 is now an input with pull-up enabled
 
-	processState = BUTTON_READ;
-	xTaskCreate(prvButtonTask, (signed portCHAR *) "BUTN", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
+	EICRA = 0x02;				// The falling edge of INT0 generates an interrupt request.
+	EIMSK = 0x01;				// Turns on INT0.
+
+	vSemaphoreCreateBinary(xSemaphore);
+
+	if (xSemaphore != NULL) {
+		xTaskCreate(prvButtonTask, (signed portCHAR *) "BUTN", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
+	}
 }
 
 static void prvButtonTask(void *arg) {
 	for (;;) {
-		switch (processState) {
-		case BUTTON_READ:
-			if (BUTTON_D2_PRESSED()) {	// Input LOW --> Button pressed
-				processState = BUTTON_DEBOUNCE;
-			} else {
-				vTaskDelay(1); // 1ms de atraso, faz o polling do botão com frequência de 1KHz
-			}
-			break;
+		xSemaphoreTake(xSemaphore, portMAX_DELAY);
 
-		case BUTTON_DEBOUNCE:
-			vTaskDelay(18);
-			if (BUTTON_D2_PRESSED() && buttonState == 0) {
-				togglePump();
-				buttonState = 1;
-			} else if (!BUTTON_D2_PRESSED()) {
-				buttonState = 0;
-			}
-			processState = BUTTON_READ;
-			break;
+		vTaskDelay(50);
+
+		if (BUTTON_D2_PRESSED()) {
+			togglePump();
 		}
 	}
+}
+
+ISR(INT0_vect) {
+	xSemaphoreGiveFromISR(xSemaphore, pdFALSE);
 }

@@ -5,68 +5,35 @@
  *      Author: Patrizio
  */
 
-#include <FreeRTOS.h>
-#include <task.h>
+#include <avr/io.h>
 #include "TaskPump.h"
 
-static void prvPumpTask(void *arg);
-
-static unsigned char processState;
-static unsigned char pumpState;
-
-enum {
-	PUMP_STOP,
-	PUMP_START,
-	PUMP_IDLE
-};
+static uint8_t pumpState;
 
 void xStartPumpTask(void) {
 	// Pin C3 as OUTPUT.
-	DDRC |= _BV(DDC3);
-	pumpState = processState = PUMP_STOP;
-	xTaskCreate(prvPumpTask, (signed portCHAR *) "PUMP", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+	DDRD |= _BV(DDD7);
+	pumpStop();
 }
 
 void pumpStart(void) {
-	processState = PUMP_START;
+	// Port HIGH.
+	PORTD |= _BV(PORTD7);
+	// Guarda o estado lógico da bomba
+	pumpState = 1;
 }
 
 void pumpStop(void) {
-	processState = PUMP_STOP;
+	// Port HIGH.
+	PORTD &= ~_BV(PORTD7);
+	// Guarda o estado lógico da bomba
+	pumpState = 0;
 }
 
 void togglePump(void) {
-	if (pumpState == PUMP_START) {
-		processState = PUMP_STOP;
+	if (pumpState) {
+		pumpStop();
 	} else {
-		processState = PUMP_START;
-	}
-}
-
-static void prvPumpTask(void *arg) {
-	for (;;) {
-		switch (processState) {
-		case PUMP_STOP:
-			// Port LOW.
-			PORTC &= ~_BV(PORTC3);
-			// Guarda o estado lógico da bomba
-			pumpState = PUMP_STOP;
-			processState = PUMP_IDLE;
-			vTaskDelay(250);
-			break;
-
-		case PUMP_START:
-			// Port HIGH.
-			PORTC |= _BV(PORTC3);
-			// Guarda o estado lógico da bomba
-			pumpState = PUMP_START;
-			processState = PUMP_IDLE;
-			vTaskDelay(250);
-			break;
-
-		case PUMP_IDLE:
-			vTaskDelay(50);
-			break;
-		}
+		pumpStart();
 	}
 }
