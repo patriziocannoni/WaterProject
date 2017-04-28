@@ -40,7 +40,7 @@ static void prvButtonTask(void *arg) {
 		xSemaphoreTake(xSemaphore, portMAX_DELAY);
 
 		// Some ms for debouncing.
-		vTaskDelay(25);
+		vTaskDelay(50);
 
 		if (BUTTON_D2_PRESSED()) {
 			togglePump();
